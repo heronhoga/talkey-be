@@ -5,16 +5,16 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/heronhoga/talkey-be/databases"
-	"github.com/heronhoga/talkey-be/utils"
+	"github.com/heronhoga/talkey-be/config"
+	"github.com/heronhoga/talkey-be/util"
 )
 
 func main() {
-	utils.LoadEnv()
+	util.LoadEnv()
 	app := fiber.New()
 
 	//db config
-	databases.ConnectDB()
+	config.ConnectDB()
 
 	frontEndApp := os.Getenv("FRONTEND_APP")
 
