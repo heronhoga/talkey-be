@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"regexp"
 
 	"github.com/heronhoga/talkey-be/model"
 	"github.com/heronhoga/talkey-be/repository"
@@ -27,7 +28,18 @@ func (s *UserService) RegisterNewUser(ctx context.Context, username, email, pass
 		return errors.New("username, email, and password are required")
 	}
 
-	//Check if user already exists
+	// Validate email format
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(email) {
+		return errors.New("email format is not valid")
+	}
+
+	// Validate password length
+	if len(password) < 6 {
+		return errors.New("minimum password length is 6 characters")
+	}
+
+	// Validate existing user email
 	exists, err := s.repo.CheckUserExists(ctx, email)
 	if err != nil {
 		return err

@@ -9,5 +9,5 @@ import (
 func RegisterUserRoutes(app fiber.Router, userHandler *handler.UserHandler) {
 	users := app.Group("/users")
 
-	users.Get("/register", userHandler.RegisterNewUser)
+	users.Post("/register", userHandler.RegisterNewUser)
 }
