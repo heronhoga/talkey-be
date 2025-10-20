@@ -46,11 +46,35 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
-	ctx := c.UserContext() //converts Fiber context to context.Context
+	ctx := c.UserContext()
 	user, err := h.service.GetUserByID(ctx, id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
 
 	return c.JSON(user)
+}
+
+func (h *UserHandler) Login(c *fiber.Ctx) error {
+	var req model.UserLogin
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	var userData *model.User
+	// Call service layer
+	userData, err := h.service.LoginUser(c.Context(), req.Username, req.Password)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "user successfully logged in",
+		"data": userData,
+	})
 }

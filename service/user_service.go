@@ -64,3 +64,17 @@ func (s *UserService) RegisterNewUser(ctx context.Context, username, email, pass
 	//Save to database
 	return s.repo.Create(ctx, user)
 }
+
+func (s *UserService) LoginUser(ctx context.Context, username, password string) (*model.User, error) {
+	//validation
+	if username == "" || password == "" {
+		return nil, errors.New("username/email and password are required")
+	}
+
+	userLoginRequest := &model.UserLogin{
+		Username: username,
+		Password: password,
+	}
+
+	return s.repo.Login(ctx, userLoginRequest)
+}

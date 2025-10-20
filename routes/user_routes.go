@@ -10,4 +10,5 @@ func RegisterUserRoutes(app fiber.Router, userHandler *handler.UserHandler) {
 	users := app.Group("/users")
 
 	users.Post("/register", userHandler.RegisterNewUser)
+	users.Post("/login", userHandler.Login)
 }

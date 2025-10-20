@@ -2,15 +2,18 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/heronhoga/talkey-be/model"
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (*model.User, error)
 	Create(ctx context.Context, user *model.User) error
 	CheckUserExists(ctx context.Context, email string) (bool, error)
+	Login(ctx context.Context, user *model.UserLogin) (*model.User, error)
 }
 
 type userRepository struct {
@@ -48,3 +51,33 @@ func (r *userRepository) CheckUserExists(ctx context.Context, email string) (boo
 	}
 	return count > 0, nil
 }
+
+func (r *userRepository) Login(ctx context.Context, user *model.UserLogin) (*model.User, error) {
+	query := `SELECT id, username, email, password 
+	          FROM users 
+	          WHERE username=$1 OR email=$1 
+	          LIMIT 1`
+
+	var existingUser model.User
+	err := r.db.QueryRow(ctx, query, user.Username).Scan(
+		&existingUser.ID,
+		&existingUser.Username,
+		&existingUser.Email,
+		&existingUser.Password,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			// No user found
+			return nil, errors.New("invalid username or password")
+		}
+		return nil, err
+	}
+
+	// Compare hashed passwords
+	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password)); err != nil {
+		return nil, errors.New("invalid username/email or password")
+	}
+
+	return &existingUser, nil
+}
+
