@@ -64,17 +64,16 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	var userData *model.User
 	// Call service layer
-	userData, err := h.service.LoginUser(c.Context(), req.Username, req.Password)
+	userToken, err := h.service.LoginUser(c.Context(), req.Username, req.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "user successfully logged in",
-		"data": userData,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "ok",
+		"token": userToken,
 	})
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/heronhoga/talkey-be/routes"
 	"github.com/heronhoga/talkey-be/service"
 	"github.com/heronhoga/talkey-be/util"
+	"github.com/heronhoga/talkey-be/util/auth"
 )
 
 func main() {
@@ -37,6 +38,10 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 	routes.RegisterUserRoutes(app, userHandler)
+
+	//generate PASETO keys and initialize them
+	// auth.GenerateKey()
+	auth.Init()
 
 	app.Listen(":8000")
 }
