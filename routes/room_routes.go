@@ -9,4 +9,5 @@ import (
 func RegisterRoomRoutes(app fiber.Router, roomHandler *handler.RoomHandler) {
 	users := app.Group("/rooms")
 	users.Post("/create", auth.AuthMiddleware, roomHandler.CreateRoom)
+	users.Post("/join", auth.AuthMiddleware, roomHandler.JoinRoom)
 }

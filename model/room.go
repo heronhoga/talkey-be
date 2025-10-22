@@ -21,3 +21,7 @@ type RoomCreate struct {
 	MaxParticipants uint8 `json:"max_participants"`
 	UserID uuid.UUID `json:"user_id"`
 }
+
+type RoomJoin struct {
+	RoomID uuid.UUID `json:"room_id"`
+}

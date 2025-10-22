@@ -40,3 +40,27 @@ func (h *RoomHandler) CreateRoom(c *fiber.Ctx) error {
 		"message": "ok",
 	})
 }
+
+func (h *RoomHandler) JoinRoom(c *fiber.Ctx) error {
+	var req *model.RoomJoin
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	userId := c.Locals("id").(string)
+
+	err := h.service.JoinRoom(c.Context(), req.RoomID.String(), userId)
+	
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "ok",
+	})
+	
+}

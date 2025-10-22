@@ -38,3 +38,11 @@ func (s *RoomService) CreateRoom(ctx context.Context, roomCreate *model.RoomCrea
 
 	return s.repo.CreateRoom(ctx, newRoom, userId)
 }
+
+func (s *RoomService) JoinRoom(ctx context.Context, roomId string, userId string) error {
+	if roomId == "" || userId == "" {
+		return errors.New("room id and user id are required")
+	}
+
+	return s.repo.JoinRoom(ctx, roomId, userId)	
+}
