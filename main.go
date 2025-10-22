@@ -34,10 +34,18 @@ func main() {
 	}))
 
 	//dependency
+	//user
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 	routes.RegisterUserRoutes(app, userHandler)
+
+
+	//room
+	roomRepo := repository.NewRoomRepository(db)
+	roomService := service.NewRoomService(roomRepo)
+	roomHandler := handler.NewRoomHandler(roomService)
+	routes.RegisterRoomRoutes(app, roomHandler)
 
 	//generate PASETO keys and initialize them
 	// auth.GenerateKey()

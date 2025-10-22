@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -69,4 +70,26 @@ func GenerateToken(id string, username string) (string, error) {
 	signed := token.V4Sign(PrivateKey, nil)
 
 	return signed, nil
+}
+
+func VerifyToken(tokenStr string) (*paseto.Token, error) {
+	
+	var ErrInvalidToken = errors.New("invalid token")
+	var ErrExpiredToken = errors.New("token has expired")
+	parser := paseto.NewParser()
+
+	token, err := parser.ParseV4Public(PublicKey, tokenStr, nil)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	expiration, err := token.GetExpiration()
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+	if time.Now().After(expiration) {
+		return nil, ErrExpiredToken
+	}
+
+	return token, nil
 }

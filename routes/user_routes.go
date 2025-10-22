@@ -5,10 +5,8 @@ import (
 	"github.com/heronhoga/talkey-be/handler"
 )
 
-// RegisterUserRoutes registers all user-related routes
 func RegisterUserRoutes(app fiber.Router, userHandler *handler.UserHandler) {
 	users := app.Group("/users")
-
 	users.Post("/register", userHandler.RegisterNewUser)
 	users.Post("/login", userHandler.Login)
 }
