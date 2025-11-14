@@ -78,3 +78,23 @@ func (s *UserService) LoginUser(ctx context.Context, username, password string) 
 
 	return s.repo.Login(ctx, userLoginRequest)
 }
+
+func (s *UserService) ResetPassword(ctx context.Context, resetPasswordRequest model.UserResetPasswordRequest, userId string) error {
+	if resetPasswordRequest.OldPassword == "" || resetPasswordRequest.NewPassword == "" {
+		return errors.New("old password and new password are required")
+	}
+
+	// Validate password length
+	if len(resetPasswordRequest.NewPassword) < 6 {
+		return errors.New("minimum password length is 6 characters")
+	}
+
+
+	userResetPasswordRequest := &model.UserResetPassword{
+		UserID: userId,
+		OldPassword: resetPasswordRequest.OldPassword,
+		NewPassword: resetPasswordRequest.NewPassword,
+	}
+
+	return s.repo.ResetPassword(ctx, userResetPasswordRequest)
+}

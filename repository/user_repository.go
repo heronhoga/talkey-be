@@ -15,6 +15,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *model.User) error
 	CheckUserExists(ctx context.Context, email string) (bool, error)
 	Login(ctx context.Context, user *model.UserLogin) (string, error)
+	ResetPassword(ctx context.Context, resetPasswordRequest *model.UserResetPassword) error
 }
 
 type userRepository struct {
@@ -82,4 +83,45 @@ func (r *userRepository) Login(ctx context.Context, user *model.UserLogin) (stri
 	token, err := auth.GenerateToken(existingUser.ID.String(), existingUser.Username)
 	return token, nil
 }
+
+func (r *userRepository) ResetPassword(ctx context.Context, resetPasswordRequest *model.UserResetPassword) error {
+    // find existing user
+    query := `SELECT password FROM users WHERE id = $1`
+    var existingUserPassword string
+
+    err := r.db.QueryRow(ctx, query, resetPasswordRequest.UserID).Scan(&existingUserPassword)
+    if err != nil {
+        if errors.Is(err, pgx.ErrNoRows) {
+            return errors.New("user not found")
+        }
+        return errors.New("failed to get user")
+    }
+
+    // compare password
+    if err := bcrypt.CompareHashAndPassword(
+        []byte(existingUserPassword),
+        []byte(resetPasswordRequest.OldPassword),
+    ); err != nil {
+        return errors.New("old password is incorrect")
+    }
+
+    // hash new password
+    hashedNewPassword, err := bcrypt.GenerateFromPassword(
+        []byte(resetPasswordRequest.NewPassword),
+        bcrypt.DefaultCost,
+    )
+    if err != nil {
+        return errors.New("failed to hash new password")
+    }
+
+    // update password
+    updateQuery := `UPDATE users SET password = $1 WHERE id = $2`
+    _, err = r.db.Exec(ctx, updateQuery, hashedNewPassword, resetPasswordRequest.UserID)
+    if err != nil {
+        return errors.New("failed to update password")
+    }
+
+    return nil
+}
+
 
